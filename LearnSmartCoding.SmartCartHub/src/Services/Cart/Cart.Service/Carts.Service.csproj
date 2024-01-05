@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cart.Core\Carts.Core.csproj" />
+    <ProjectReference Include="..\Cart.Data\Carts.Data.csproj" />
+  </ItemGroup>
+
+</Project>
