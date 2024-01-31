@@ -123,10 +123,10 @@ namespace Orders.Web
 
 
                 // Add your other services, repositories, etc.
-                builder.Services.AddTransient<IOrderService, OrderService>();
-                builder.Services.AddTransient<IOrderRepository, OrderRepository>();
-                builder.Services.AddTransient<IProductService, ProductService>();
-                builder.Services.AddTransient<IProductRepository, ProductRepository>();
+                builder.Services.AddScoped<IOrderService, OrderService>();
+                builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+                builder.Services.AddScoped<IProductService, ProductService>();
+                builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
                 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
                 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();

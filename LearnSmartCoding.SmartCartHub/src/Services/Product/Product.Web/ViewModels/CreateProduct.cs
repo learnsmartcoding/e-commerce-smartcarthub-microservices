@@ -7,8 +7,7 @@ namespace Products.Web.RequestModels
   
     public class CreateProduct: ProductViewModel
     {
-        public List<IFormFile>? ProductImages { get; set; }        
-
+        public List<IFormFile>? Images { get; set; }
         public override async Task<IEnumerable<ValidationResult>> ValidateAsync(ValidationContext validationContext,
       CancellationToken cancellation)
         {

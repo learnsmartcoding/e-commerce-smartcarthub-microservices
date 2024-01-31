@@ -1,17 +1,17 @@
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Logging;
 using Products.Data;
 using Products.Service;
 using Products.Web.Common;
+using Products.Web.Configurations;
 using Products.Web.Middlewares;
 using Serilog;
 using Serilog.Templates;
-using System;
-using System.Net;
 using System.Text.Json.Serialization;
 
 namespace Products.Web
@@ -56,40 +56,40 @@ namespace Products.Web
                           options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                       });
 
-                // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
-                builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                        .AddMicrosoftIdentityWebApi(options =>
+                //// Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
+                //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                //        .AddMicrosoftIdentityWebApi(options =>
 
-                        {
-                            configuration.Bind("AzureAdB2C", options);
-                            options.Events = new JwtBearerEvents();
+                //        {
+                //            configuration.Bind("AzureAdB2C", options);
+                //            options.Events = new JwtBearerEvents();
 
-                            /// <summary>
-                            /// Below you can do extended token validation and check for additional claims, such as:
-                            ///
-                            /// - check if the caller's account is homed or guest via the 'acct' optional claim
-                            /// - check if the caller belongs to right roles or groups via the 'roles' or 'groups' claim, respectively
-                            ///
-                            /// Bear in mind that you can do any of the above checks within the individual routes and/or controllers as well.
-                            /// For more information, visit: https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validate-the-user-has-permission-to-access-this-data
-                            /// </summary>
+                //            /// <summary>
+                //            /// Below you can do extended token validation and check for additional claims, such as:
+                //            ///
+                //            /// - check if the caller's account is homed or guest via the 'acct' optional claim
+                //            /// - check if the caller belongs to right roles or groups via the 'roles' or 'groups' claim, respectively
+                //            ///
+                //            /// Bear in mind that you can do any of the above checks within the individual routes and/or controllers as well.
+                //            /// For more information, visit: https://docs.microsoft.com/azure/active-directory/develop/access-tokens#validate-the-user-has-permission-to-access-this-data
+                //            /// </summary>
 
-                            //options.Events.OnTokenValidated = async context =>
-                            //{
-                            //    string[] allowedClientApps = { /* list of client ids to allow */ };
+                //            //options.Events.OnTokenValidated = async context =>
+                //            //{
+                //            //    string[] allowedClientApps = { /* list of client ids to allow */ };
 
-                            //    string clientAppId = context?.Principal?.Claims
-                            //        .FirstOrDefault(x => x.Type == "azp" || x.Type == "appid")?.Value;
+                //            //    string clientAppId = context?.Principal?.Claims
+                //            //        .FirstOrDefault(x => x.Type == "azp" || x.Type == "appid")?.Value;
 
-                            //    if (!allowedClientApps.Contains(clientAppId))
-                            //    {
-                            //        throw new System.Exception("This client is not authorized");
-                            //    }
-                            //};
-                        }, options => { configuration.Bind("AzureAdB2C", options); });
+                //            //    if (!allowedClientApps.Contains(clientAppId))
+                //            //    {
+                //            //        throw new System.Exception("This client is not authorized");
+                //            //    }
+                //            //};
+                //        }, options => { configuration.Bind("AzureAdB2C", options); });
 
-                // The following flag can be used to get more descriptive errors in development environments
-                IdentityModelEventSource.ShowPII = false;
+                //// The following flag can be used to get more descriptive errors in development environments
+                //IdentityModelEventSource.ShowPII = false;
 
                 // In production, modify this with the actual domains you want to allow
                 builder.Services.AddCors(o => o.AddPolicy("default", builder =>
@@ -124,14 +124,14 @@ namespace Products.Web
 
 
                 // Add your other services, repositories, etc.
-                builder.Services.AddTransient<IProductService, ProductService>();
-                builder.Services.AddTransient<IProductRepository, ProductRepository>();
+                builder.Services.AddScoped<IProductService, ProductService>();
+                builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
-                builder.Services.AddTransient<ICategoryService, CategoryService>();
-                builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+                builder.Services.AddScoped<ICategoryService, CategoryService>();
+                builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
-                builder.Services.AddTransient<IProductReviewService, ProductReviewService>();
-                builder.Services.AddTransient<IProductReviewRepository, ProductReviewRepository>();
+                builder.Services.AddScoped<IProductReviewService, ProductReviewService>();
+                builder.Services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
 
                 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
                 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
@@ -141,9 +141,19 @@ namespace Products.Web
                 builder.Services.AddTransient<RequestBodyLoggingMiddleware>();
                 builder.Services.AddTransient<ResponseBodyLoggingMiddleware>();
 
+                // Bind Azure Blob Storage configuration from appsettings.json
+                builder.Services.Configure<AzureBlobStorageConfiguration>(configuration.GetSection("AzureBlobStorage"));
+
+                // Register the IStorageService with Azure Blob Storage configuration
+                builder.Services.AddScoped<IStorageService, StorageService>
+                (provider =>
+            {
+                var azureBlobStorageConfiguration = provider.GetRequiredService<IOptions<AzureBlobStorageConfiguration>>().Value;
+                return new StorageService(azureBlobStorageConfiguration.ConnectionString);
+            });
 
                 var app = builder.Build();
-                              
+
 
                 ExceptionMiddleware.ConfigureExceptionHandler(app, builder.Environment);
 
@@ -167,8 +177,8 @@ namespace Products.Web
 
                 app.UseRouting();
 
-                app.UseAuthentication();
-                app.UseAuthorization();
+                //app.UseAuthentication();
+                //app.UseAuthorization();
 
                 app.MapControllers();
 

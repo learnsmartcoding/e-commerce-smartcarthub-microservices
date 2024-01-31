@@ -93,3 +93,9 @@ This Microservice is deployed to Azure and can be accessed here https://lsc-ecom
 
 ## Database Scripts
 Database script can be found at root level of this repository E.g. LearnSmartDB_DB_Script.sql
+
+### We will work on our features on each video and for each feature, we will have named branch name. E.g. branch name will be feature/ep1_<featureinshort>
+
+### Feature 1: Initial Setup of HTML Template
+This video features how we will setup our angular application with free bootstrap template code. This allow us to create beautiful website.
+- Branch name : "feature/ep_InitialSetup
