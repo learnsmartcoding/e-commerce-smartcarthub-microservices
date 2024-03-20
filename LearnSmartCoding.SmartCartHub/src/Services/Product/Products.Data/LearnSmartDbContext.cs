@@ -191,6 +191,7 @@ public partial class LearnSmartDbContext : DbContext
 
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.ProductName).HasMaxLength(100);
+            entity.Property(e => e.ProductDescription).HasMaxLength(4000);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)

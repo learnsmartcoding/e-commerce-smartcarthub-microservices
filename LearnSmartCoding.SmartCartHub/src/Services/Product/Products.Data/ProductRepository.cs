@@ -122,15 +122,15 @@ namespace Products.Data
                         }
                     }
 
-                    // Remove images that are no longer associated with the product
-                    var imagesToRemove = existingProduct.ProductImages
-                        .Where(existingImage => !product.ProductImages.Any(updatedImage => updatedImage.ImageId == existingImage.ImageId))
-                        .ToList();
+                    //// Remove images that are no longer associated with the product
+                    //var imagesToRemove = existingProduct.ProductImages
+                    //    .Where(existingImage => !product.ProductImages.Any(updatedImage => updatedImage.ImageId == existingImage.ImageId))
+                    //    .ToList();
 
-                    foreach (var image in imagesToRemove)
-                    {
-                        existingProduct.ProductImages.Remove(image);
-                    }
+                    //foreach (var image in imagesToRemove)
+                    //{
+                    //    existingProduct.ProductImages.Remove(image);
+                    //}
                 }
             }
 

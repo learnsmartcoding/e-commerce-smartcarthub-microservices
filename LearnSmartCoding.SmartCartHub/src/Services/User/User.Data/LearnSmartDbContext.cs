@@ -47,6 +47,7 @@ public partial class LearnSmartDbContext : DbContext
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     public virtual DbSet<Wishlist> Wishlists { get; set; }
+    public virtual DbSet<ContactUs> ContactUs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -290,6 +291,12 @@ public partial class LearnSmartDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Wishlists)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Wishlist_UserProfile");
+        });
+
+        modelBuilder.Entity<ContactUs>(entity =>
+        {
+            entity.HasKey(e => e.ContactUsId).HasName("PK_ContactUs_ContactUsId");
+            entity.ToTable("ContactUs");
         });
 
         OnModelCreatingPartial(modelBuilder);

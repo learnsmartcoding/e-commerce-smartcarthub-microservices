@@ -1,16 +1,16 @@
 
-IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = 'LearnSmartDB')
+IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = 'SmartCartHub')
 BEGIN
     -- Create the database
-    CREATE DATABASE LearnSmartDB;
+    CREATE DATABASE SmartCartHub;
 END
 ELSE
 BEGIN
-   DROP DATABASE LearnSmartDB;
+   DROP DATABASE SmartCartHub;
 END
 
 Go
-use LearnSmartDB
+use SmartCartHub
 go
 
 -- User Profile Table
@@ -55,6 +55,7 @@ CREATE TABLE Category (
 CREATE TABLE Product (
     ProductId INT IDENTITY(1,1),
     ProductName NVARCHAR(100) NOT NULL,
+    ProductDescription NVARCHAR(4000) NOT NULL,
     Price DECIMAL(10, 2) NOT NULL,
     Quantity INT NOT NULL,
     CategoryId INT,
@@ -211,7 +212,37 @@ CREATE TABLE Wishlist (
     CONSTRAINT FK_Wishlist_Product FOREIGN KEY (ProductId) REFERENCES Product(ProductId)
 );
 
+--Contact Us table
+CREATE TABLE ContactUs (
+    ContactUsId INT IDENTITY(1,1),
+    UserName NVARCHAR(100) NOT NULL,
+	UserEmail NVARCHAR(100) NOT NULL,
+	MessageDetail NVARCHAR(2000) NOT NULL,    
+    CONSTRAINT PK_ContactUs_ContactUsId PRIMARY KEY (ContactUsId)    
+);
 
+
+-- To drop all tables without deleting database
+--DROP TABLE IF EXISTS UserProfile
+--DROP TABLE IF EXISTS Roles
+--DROP TABLE IF EXISTS UserRole
+--DROP TABLE IF EXISTS Category
+--DROP TABLE IF EXISTS Product
+--DROP TABLE IF EXISTS Address
+--DROP TABLE IF EXISTS Orders
+--DROP TABLE IF EXISTS OrderItem
+--DROP TABLE IF EXISTS PaymentInformation
+--DROP TABLE IF EXISTS OrderStatus
+--DROP TABLE IF EXISTS ProductReview
+--DROP TABLE IF EXISTS ProductImage
+--DROP TABLE IF EXISTS Coupon
+--DROP TABLE IF EXISTS OrderCoupon
+--DROP TABLE IF EXISTS UserActivityLog
+--DROP TABLE IF EXISTS Cart
+--DROP TABLE IF EXISTS Wishlist
+--DROP TABLE IF EXISTS ContactUs
+
+-- ends here
 ---- Create an INSTEAD OF INSERT trigger to enforce the unique condition
 --CREATE TRIGGER trg_EnforceSingleShippingAddress
 --ON Address
@@ -287,61 +318,19 @@ Cart
 Wishlist
 */
 
-INSERT INTO UserProfile ( DisplayName, FirstName, LastName, Email, AdObjId)
-VALUES
-( 'JohnDoe', 'John', 'Doe', 'john.doe@example.com', '1a2b3c4d-5e6f-7g8h-9i10-11j12k13l14m'),
-('JaneSmith', 'Jane', 'Smith', 'jane.smith@example.com', '2n3o4p5q-6r7s-8t9u-10v11w12x13y14')
-
 
 -- Roles Table
 INSERT INTO Roles (RoleName)
 VALUES
 ('Admin'),
 ('ReadOnly'),
-('Support');
--- Add more rows as needed
-
--- UserRole Table
-INSERT INTO UserRole (RoleId, UserId)
-VALUES
-(1, 1), -- JohnDoe is an Admin
-(2, 2), -- JaneSmith is a ReadOnly user
-(3, 1); -- JohnDoe has Support role
--- Add more rows as needed
-
--- Address Table
-INSERT INTO Address ( UserId, Street, City, State, ZipCode, IsShippingAddress)
-VALUES
-(1, '123 Main St', 'Cityville', 'Stateville', '12345', 1),
-(1, '456 Oak St', 'Townsville', 'Stateville', '67890', 0),
-(2, '789 Pine St', 'Villageville', 'Stateville', '54321', 1);
--- Add more rows as needed
-
--- UserActivityLog Table
-INSERT INTO UserActivityLog ( UserId, ActivityType, ActivityDescription, LogDate)
-VALUES
-(1, 'Login', 'User logged in successfully', '2023-01-01T10:30:00'),
-(2, 'UpdateProfile', 'User updated profile information', '2023-01-02T15:45:00'),
-(1, 'Purchase', 'User made a purchase', '2023-01-03T08:15:00');
+('Support'),
+('User');
 
 -- Insert statements for Category table
-INSERT INTO Category (CategoryName)
-VALUES ('Electronics');
 
 INSERT INTO Category (CategoryName)
-VALUES ('Clothing');
-
--- Add more categories as needed...
-
--- Insert statements for Product table
-INSERT INTO Product (ProductName, Price, Quantity, CategoryId)
-VALUES ('Smartphone', 499.99, 100, 1);
-
-INSERT INTO Product (ProductName, Price, Quantity, CategoryId)
-VALUES ('Laptop', 899.99, 50, 1);
-
-INSERT INTO Product (ProductName, Price, Quantity, CategoryId)
-VALUES ('T-Shirt', 19.99, 200, 2);
-
-INSERT INTO Product (ProductName, Price, Quantity, CategoryId)
-VALUES ('Jeans', 39.99, 100, 2);
+VALUES 
+('Electronics'),
+('Clothing'),
+('Mobile');

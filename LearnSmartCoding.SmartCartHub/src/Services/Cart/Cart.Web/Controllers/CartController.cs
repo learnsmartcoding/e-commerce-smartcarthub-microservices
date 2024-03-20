@@ -1,15 +1,16 @@
 using Cart.Service;
 using Carts.Core.Models;
 using Carts.Web.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
 namespace Carts.Web.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/carts")]
-    public class CartController(ICartService cartService, IUserClaims userClaims) : ControllerBase
+    public class CartsController(ICartService cartService, IUserClaims userClaims) : ControllerBase
     {
         private readonly ICartService _cartService = cartService;
         private readonly IUserClaims userClaims = userClaims;
@@ -23,7 +24,7 @@ namespace Carts.Web.Controllers
         [HttpGet("{cartId}")]
         [ProducesResponseType(typeof(CartModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:CartRead")]
         public async Task<ActionResult<CartModel>> GetCartById(int cartId)
         {
             var adObjId = userClaims.GetCurrentUserId();
@@ -45,7 +46,7 @@ namespace Carts.Web.Controllers
         /// <returns>The list of carts for the user.</returns>
         [HttpGet("user/{adObjId}")]
         [ProducesResponseType(typeof(List<CartModel>), StatusCodes.Status200OK)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:CartRead")]
         public async Task<ActionResult<List<CartModel>>> GetCartsByUserId(string adObjId)
         {
             var carts = await _cartService.GetCartsByUserIdAsync(adObjId);
@@ -58,7 +59,7 @@ namespace Carts.Web.Controllers
         /// <param name="adObjId">The AD object ID of the user.</param>
         /// <returns>The list of carts for the user.</returns>
         [HttpGet()]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:CartRead")]
         [ProducesResponseType(typeof(List<CartModel>), StatusCodes.Status200OK)]
         public async Task<ActionResult<List<CartModel>>> GetCurrentUserCarts()
         {
@@ -76,7 +77,7 @@ namespace Carts.Web.Controllers
         [HttpPost()]
         [ProducesResponseType(typeof(CartModel), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:CartWrite")]
         public async Task<ActionResult<CartModel>> AddToCart(CartModel cart)
         {
             var adObjId = userClaims.GetCurrentUserId();
@@ -102,10 +103,11 @@ namespace Carts.Web.Controllers
         [ProducesResponseType(typeof(CartModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:CartWrite")]
         public async Task<ActionResult<CartModel>> UpdateCart(CartModel cart)
         {
             var adObjId = userClaims.GetCurrentUserId();
+            cart.UserId=userClaims.GetLoggedInUserId();
             var isValid = await _cartService.IsCartIdValidAsync(cart.CartId, adObjId);
 
             if (!isValid)
@@ -127,7 +129,7 @@ namespace Carts.Web.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:CartWrite")]
         public async Task<ActionResult<bool>> RemoveFromCart(int cartId)
         {
             var adObjId = userClaims.GetCurrentUserId();

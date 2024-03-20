@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using Products.Core.Models;
@@ -7,9 +7,11 @@ using Products.Web.Common;
 
 namespace Products.Web.Controllers
 {
+    //[Route("api/[controller]")]
     [ApiController]
     [Route("api/productreviews")]
-    public class ProductReviewController(IProductReviewService productReviewService, IUserClaims userClaims, 
+    [Authorize]
+    public class ProductReviewsController(IProductReviewService productReviewService, IUserClaims userClaims, 
         IUserProfileService userProfileService) : ControllerBase
     {
         private readonly IProductReviewService _productReviewService = productReviewService;
@@ -17,7 +19,7 @@ namespace Products.Web.Controllers
         private readonly IUserProfileService userProfileService = userProfileService;
 
         [HttpGet("{reviewId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductReviewRead")]
         public async Task<IActionResult> GetReviewByIdAsync(int reviewId)
         {
             var review = await _productReviewService.GetReviewByIdAsync(reviewId);
@@ -29,7 +31,7 @@ namespace Products.Web.Controllers
         }
 
         [HttpGet("product/{productId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductReviewRead")]
         public async Task<IActionResult> GetReviewsByProductIdAsync(int productId)
         {
             var reviews = await _productReviewService.GetReviewsByProductIdAsync(productId);
@@ -37,7 +39,7 @@ namespace Products.Web.Controllers
         }
 
         [HttpPost]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductReviewWrite")]
         public async Task<IActionResult> AddReviewAsync([FromBody] ProductReviewModel reviewModel)
         {
             if (!ModelState.IsValid)
@@ -53,7 +55,7 @@ namespace Products.Web.Controllers
         }
 
         [HttpPut]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductReviewWrite")]
         public async Task<IActionResult> UpdateReviewAsync([FromBody] ProductReviewModel reviewModel)
         {
             if (!ModelState.IsValid)
@@ -74,7 +76,7 @@ namespace Products.Web.Controllers
         }
 
         [HttpDelete("{reviewId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductReviewWrite")]
         public async Task<IActionResult> DeleteReviewAsync(int reviewId)
         {
             var isDeleted = await _productReviewService.DeleteReviewAsync(reviewId);

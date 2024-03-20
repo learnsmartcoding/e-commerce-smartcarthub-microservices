@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using User.Core.Models;
 using User.Service;
 using User.Web.Common;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace User.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AddressController(IAddressService addressService, IUserProfileService userProfileService, IUserClaims userClaims) : ControllerBase
     {
         private readonly IAddressService _addressService = addressService;
@@ -21,7 +22,7 @@ namespace User.Web.Controllers
         [ProducesResponseType(403)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:AddressRead")]
         public async Task<IActionResult> GetAddressById(int addressId)
         {
             var address = await _addressService.GetAddressByIdAsync(addressId);
@@ -36,7 +37,7 @@ namespace User.Web.Controllers
 
         [HttpGet()]
         [ProducesResponseType(typeof(List<AddressModel>), 200)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:AddressRead")]
         public async Task<IActionResult> GetAddressesByUserId()
         {
             var userId = await GetUserProfieIdAsync();
@@ -46,7 +47,7 @@ namespace User.Web.Controllers
 
         [HttpGet("user/{userId}")]
         [ProducesResponseType(typeof(List<AddressModel>), 200)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:AddressRead")]
         public async Task<IActionResult> GetAddressesByUserId(int userId)
         {            
             var addresses = await _addressService.GetAddressesByUserIdAsync(userId);
@@ -56,7 +57,7 @@ namespace User.Web.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(AddressModel), 201)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:AddressWrite")]
         public async Task<IActionResult> AddAddress([FromBody] AddressModel addressModel)
         {
             addressModel.UserId = await GetUserProfieIdAsync();
@@ -66,7 +67,7 @@ namespace User.Web.Controllers
 
         [HttpPut]
         [ProducesResponseType(typeof(AddressModel), 200)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:AddressWrite")]
         public async Task<IActionResult> UpdateAddress([FromBody] AddressModel addressModel)
         {
             var updatedAddress = await _addressService.UpdateAddressAsync(addressModel);
@@ -81,7 +82,7 @@ namespace User.Web.Controllers
 
         [HttpDelete("{addressId}")]
         [ProducesResponseType(202)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:AddressWrite")]
         public async Task<IActionResult> DeleteAddress(int addressId)
         {            
             var isDeleted = await _addressService.DeleteAddressAsync(addressId);

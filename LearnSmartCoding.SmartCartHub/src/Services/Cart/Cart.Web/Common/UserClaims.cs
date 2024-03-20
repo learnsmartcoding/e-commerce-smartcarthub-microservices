@@ -6,6 +6,7 @@ namespace Carts.Web.Common
     {
         string GetCurrentUserEmail();
         string GetCurrentUserId();
+        int GetLoggedInUserId();
     }
     public class UserClaims : IUserClaims
     {
@@ -42,6 +43,12 @@ namespace Carts.Web.Common
         public string GetCurrentUserId()
         {            
            return GetClaimInfo("objectidentifier");
+        }
+
+        public int GetLoggedInUserId()
+        {
+            var userId= GetClaimInfo("extension_userId");
+            return Convert.ToInt32(userId);
         }
     }
 }

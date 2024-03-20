@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using User.Core.Entities;
@@ -10,6 +11,7 @@ namespace User.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserActivityLogController(IUserActivityLogService service, IUserClaims userClaims) : ControllerBase
     {
         private readonly IUserActivityLogService _service = service;
@@ -18,7 +20,7 @@ namespace User.Web.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:UserActivityWrite")]
         public async Task<ActionResult<UserActivityLogModel>> LogUserActivity(UserActivityLogModel activityLog)
         {            
             var adObjId= userClaims.GetCurrentUserId();
@@ -29,7 +31,7 @@ namespace User.Web.Controllers
         [HttpGet("{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:UserActivityRead")]
         public async Task<ActionResult<List<UserActivityLogModel>>> GetUserActivityLogs(int userId)
         {
             var activityLogs = await _service.GetUserActivityLogsAsync(userId);
@@ -45,7 +47,7 @@ namespace User.Web.Controllers
         [HttpGet()]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:UserActivityRead")]
         public async Task<ActionResult<List<UserActivityLogModel>>> GetLoggedInUserActivityLogs()
         {            
             var adObjId= userClaims.GetCurrentUserId();

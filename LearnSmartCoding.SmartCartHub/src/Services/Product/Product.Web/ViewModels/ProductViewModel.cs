@@ -10,6 +10,9 @@ namespace Products.Web.ViewModels
 
         [Required(ErrorMessage = "ProductName is required.")]
         public required string ProductName { get; set; } = null!;
+        
+        [Required(ErrorMessage = "ProductDescription is required.")]
+        public required string ProductDescription { get; set; } = null!;
 
         [Required(ErrorMessage = "Price is required")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]

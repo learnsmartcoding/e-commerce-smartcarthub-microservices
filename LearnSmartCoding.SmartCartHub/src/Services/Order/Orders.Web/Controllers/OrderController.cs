@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using Orders.Core.Models;
@@ -11,6 +12,7 @@ namespace Orders.Web.Controllers
     [ApiController]
     [Route("api/orders")]
     [Produces("application/json")]
+    [Authorize]
     public class OrderController(IOrderService orderService, 
         IUserClaims userClaims, IMapper mapper,
         IUserProfileService userProfileService) : ControllerBase

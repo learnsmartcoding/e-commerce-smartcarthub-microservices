@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using User.Core.Models;
@@ -18,7 +17,7 @@ namespace User.Web.Controllers
         private readonly IUserClaims userClaims = userClaims;
 
         [HttpPost]        
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProfileWrite")]
         public async Task<ActionResult<UserProfileModel>> CreateUser([FromBody] UserProfileModel userProfileModel)
         {
             var createdUserProfile = await _userProfileService.CreateUserAsync(userProfileModel);
@@ -26,7 +25,7 @@ namespace User.Web.Controllers
         }
 
         [HttpGet("{userId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProfileRead")]
         public async Task<ActionResult<UserProfileModel>> GetUserById(int userId)
         {
             var userProfile = await _userProfileService.GetUserByIdAsync(userId);
@@ -39,7 +38,7 @@ namespace User.Web.Controllers
         }
 
         [HttpGet()]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProfileRead")]
         public async Task<ActionResult<UserProfileModel>> GetCurrentUser()
         {
             var userAdObjId = userClaims.GetCurrentUserId();
@@ -55,7 +54,7 @@ namespace User.Web.Controllers
         }
 
         [HttpPut("{userId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProfileWrite")]
         public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserProfileModel userProfileModel)
         {
             if (userId != userProfileModel.UserId)
@@ -68,7 +67,7 @@ namespace User.Web.Controllers
         }
 
         [HttpDelete("{userId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProfileWrite")]
         public async Task<IActionResult> DeleteUser(int userId)
         {
             var isSuccess = await _userProfileService.DeleteUserAsync(userId);

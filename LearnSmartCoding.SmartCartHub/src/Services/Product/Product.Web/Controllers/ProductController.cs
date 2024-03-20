@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using Products.Core.Models;
 using Products.Service;
@@ -8,6 +9,7 @@ namespace Products.Web.Controllers
 {
     [ApiController]
     [Route("api/products")]
+    [Authorize]
     public class ProductsController(IProductService productService, 
         IStorageService storageService) : ControllerBase
     {
@@ -18,14 +20,14 @@ namespace Products.Web.Controllers
         /// Get a product by its ID.
         /// </summary>
         /// <param name="productId">The ID of the product to retrieve.</param>
-        /// <returns>The requested product.</returns>
+        /// <returns>The requested product.</returns>        
         [HttpGet("{productId}")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProductModel))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]     
         public async Task<IActionResult> GetProductById(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -36,12 +38,19 @@ namespace Products.Web.Controllers
             return Ok(product);
         }
 
+        /// <summary>
+        /// [AllowAnonymous]
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="sortBy"></param>
+        /// <returns></returns>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ProductModel>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]               
         public async Task<IActionResult> GetAllProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string sortBy = "ProductName")
         {
             var products = await _productService.GetAllProductsAsync(pageNumber, pageSize, sortBy);
@@ -56,7 +65,8 @@ namespace Products.Web.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductWrite")]
+        //[AllowAnonymous]
         public async Task<IActionResult> AddProduct(CreateProduct productModel )
         {
             if (productModel.Images != null)
@@ -79,7 +89,7 @@ namespace Products.Web.Controllers
                 //Change this to store it in Azure Blob storage
                 foreach (var file in productModel.Images)
                 {
-                    var fileName = $"{productModel.CategoryId}_{productModel.ProductName.Replace(" ", "_")}.{file.FileName.Split('.').LastOrDefault()}";
+                    var fileName = $"{productModel.CategoryId}_{productModel.ProductName.Replace(" ", "_")}_{file.FileName.Split('.').FirstOrDefault()}.{file.FileName.Split('.').LastOrDefault()}";
                     var filePath = "";
 
                     //we try to upload to azure storage, if that is not configured then it will upload to local folder
@@ -115,7 +125,8 @@ namespace Products.Web.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductWrite")]
+        //[AllowAnonymous]
         public async Task<IActionResult> UpdateProduct(int productId, UpdateProduct productModel)
         {
             if (productId != productModel.ProductId)
@@ -144,7 +155,7 @@ namespace Products.Web.Controllers
                 //Change this to store it in Azure Blob storage
                 foreach (var file in productModel.Images)
                 {
-                    var fileName = $"{productModel.CategoryId}_{productModel.ProductName.Replace(" ", "_")}.{file.FileName.Split('.').LastOrDefault()}";
+                    var fileName = $"{productModel.CategoryId}_{productModel.ProductName.Replace(" ", "_")}_{file.FileName.Split('.').FirstOrDefault()}.{file.FileName.Split('.').LastOrDefault()}";
                     var filePath = "";
 
                     //we try to upload to azure storage, if that is not configured then it will upload to local folder
@@ -176,7 +187,7 @@ namespace Products.Web.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductWrite")]
         public async Task<IActionResult> DeleteProduct(int productId)
         {
             var success = await _productService.DeleteProductAsync(productId);
@@ -192,22 +203,24 @@ namespace Products.Web.Controllers
             var productEntity = new ProductModel
             {
                 ProductName = productModel.ProductName,
+                ProductDescription = productModel.ProductDescription,
                 Price = productModel.Price,
                 Quantity = productModel.Quantity,
                 CategoryId = productModel.CategoryId,
-                ProductImages = new List<ProductImageModel>()
+                ProductImages = new List<ProductImageModel>(),
+                ProductId = productModel.ProductId
             };
             return productEntity;
         }
         private bool IsValidFile(IFormFile file)
         {
-            List<string> validFormats = new List<string>() { ".jpg", ".png", ".jpeg" };
+            List<string> validFormats = new List<string>() { ".jpg", ".png", ".jpeg",".mp3",".mp4" };
             var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
             return validFormats.Contains(extension);
         }
 
         [HttpGet("images/{imageId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductRead")]
         public async Task<IActionResult> GetProductImageByIdAsync(int imageId)
         {
             var image = await _productService.GetProductImageByIdAsync(imageId);
@@ -220,7 +233,8 @@ namespace Products.Web.Controllers
         }
 
         [HttpGet("{productId}/images")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Read")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductRead")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetImagesByProductIdAsync(int productId)
         {
             var images = await _productService.GetImagesByProductIdAsync(productId);
@@ -228,7 +242,7 @@ namespace Products.Web.Controllers
         }
 
         [HttpPost("{productId}/images")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductWrite")]
         public async Task<IActionResult> AddProductImageAsync(int productId, [FromBody] ProductImageModel imageModel)
         {
             if (!ModelState.IsValid)
@@ -241,7 +255,7 @@ namespace Products.Web.Controllers
         }
 
         [HttpDelete("images/{imageId}")]
-        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:Write")]
+        [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes:ProductWrite")]
         public async Task<IActionResult> DeleteProductImageAsync(int imageId)
         {
             var isDeleted = await _productService.DeleteProductImageAsync(imageId);
