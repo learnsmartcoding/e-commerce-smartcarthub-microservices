@@ -15,7 +15,8 @@ namespace User.Data
 
         public async Task<Address> GetAddressByIdAsync(int addressId)
         {
-            return await _dbContext.Addresses.FindAsync(addressId);
+            //return await _dbContext.Addresses.FindAsync(addressId);
+            return await _dbContext.Addresses.FirstOrDefaultAsync(a => a.AddressId == addressId);
         }
 
         public async Task<List<Address>> GetAddressesByUserIdAsync(int userId)

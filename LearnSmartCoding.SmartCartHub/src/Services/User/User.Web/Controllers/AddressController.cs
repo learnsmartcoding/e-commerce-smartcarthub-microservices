@@ -71,11 +71,11 @@ namespace User.Web.Controllers
         public async Task<IActionResult> UpdateAddress([FromBody] AddressModel addressModel)
         {
             var updatedAddress = await _addressService.UpdateAddressAsync(addressModel);
-
             if (updatedAddress == null)
             {
                 return NotFound();
             }
+            
 
             return Ok(updatedAddress);
         }

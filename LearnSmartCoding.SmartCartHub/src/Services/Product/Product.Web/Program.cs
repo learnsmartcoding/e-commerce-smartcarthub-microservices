@@ -162,7 +162,7 @@ namespace Products.Web
 
                 ExceptionMiddleware.ConfigureExceptionHandler(app, builder.Environment);
 
-
+                app.UseMiddleware<DelayMiddleware>();//only for demo purpose to induce delay in API response to show spinner on UI
                 app.UseMiddleware<RequestResponseLoggingMiddleware>();
                 // Enable our custom middleware
                 app.UseMiddleware<RequestBodyLoggingMiddleware>();
